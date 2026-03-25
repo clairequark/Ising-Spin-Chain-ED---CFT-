@@ -1,0 +1,15 @@
+# Plots 
+.png
+.jpg
+.pdf
+plots/
+
+# Logs / Outputs 
+*.log 
+*.out 
+
+# VS Code 
+.vscode/ 
+
+# Runner file 
+runner.jl 
