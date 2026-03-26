@@ -12,4 +12,4 @@ plots/
 .vscode/ 
 
 # Runner file 
-runner.jl 
+runner.jl

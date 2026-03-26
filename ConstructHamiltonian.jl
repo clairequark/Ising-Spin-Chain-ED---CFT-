@@ -1,5 +1,7 @@
 module ConstructHamiltonian
 
+include("basis_construction.jl")
+
 using SparseArrays 
 using LinearAlgebra
 using Plots
@@ -119,9 +121,7 @@ function generate_hamiltonian(params::ModelParams; PBC::Int = 1)
 
     if PBC == 1 
         H_int = construct_interaction_terms_PBC(params)
-    end
-
-    if PBC == 0 
+    else
         H_int = construct_interaction_terms_OBC(params)
     end
     return H_occ + H_int
@@ -135,6 +135,8 @@ function construct_translation_operator(params::ModelParams; PBC::Int = 1)
 
     N = params.N 
     dim = 2^N 
+    mask = (1 << N) - 1
+    rows, cols, vals = Int[], Int[], Float64[]
 
     if PBC  == 0 
         print("Error: Crystal Momentum is not a good quantum number. Please check boundary conditions (PBC ==0)")
@@ -142,7 +144,7 @@ function construct_translation_operator(params::ModelParams; PBC::Int = 1)
 
     if PBC == 1
         for s in 0:(dim-1)
-            s_rot = bitrotate(s, 1)
+            s_rot = translate(s, N, mask)
 
             push!(rows, s_rot+1) # indexinggggg ; s_rot is the output so naturally it goes into the row :3
             push!(cols, s+1) #bitstrings are 0 indexed, julia arrays are one indexed, kay? 
@@ -170,10 +172,11 @@ function dense_diagonalization(A::SparseMatrixCSC)
 end
 
 
-#do it term by term, just like last time. 
-function construct_block_hamiltonian(params:ModelParams)
+#do it term by term, just like last time. (IDK if i want this jawn!)
+function construct_block_hamiltonian(params::ModelParams)
 
     N = params.N 
+    blocks = Dict{Int, AbstractMatrix}()
 
     for k in 0:(N-1)
 
@@ -239,7 +242,7 @@ function block_interaction_terms(basis::MomentumBasis, params::ModelParams)
                 s_flipped = s ⊻ (1 << site) ⊻ (1 << site_next)
 
 
-                rep, shift = find_rep_and_shift(s_flipped, params)
+                rep, shift = find_rep_and_shift(s_flipped, params, mask)
 
                 if !haskey(basis.indexmap, rep)
                     continue

@@ -19,7 +19,7 @@ function translate(t, N, mask)
 end
 
 #TBD ; need it to translate the bitstring r units. 
-function translate_r(t, N, mask)
+function translate_r(t, r, N, mask)
     for _ in 1:r 
         t = ((t << 1) | (t >> (N - 1) )) & mask
     end 
